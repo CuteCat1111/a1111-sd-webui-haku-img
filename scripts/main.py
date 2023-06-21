@@ -349,7 +349,7 @@ def add_tab():
         neon_btn.click(neon.run, all_neon_input, image_out)
         neon_rst_btn.click(lambda: [16, 1, 'BS'], None, all_neon_set)
 
-        #tilt_shift
+        #tilt shift
         all_ = [tilt_shift_focus_ratio, tilt_shift_dof]
         input_ = [image_eff] + all_
         for component in all_:
