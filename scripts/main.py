@@ -18,7 +18,9 @@ from hakuimg import(
     neon,
     curve,
     chromatic,
-    lens_distortion
+    lens_distortion,
+    custom_exif,
+    tilt_shift
 )
 from inoutpaint import main as outpaint
 
@@ -216,6 +218,11 @@ def add_tab():
                                 )
                                 lens_distortion_btn = gr.Button("refresh", variant="primary")
 
+                            with gr.TabItem('Tilt shift', elem_id='haku_TiltShift'):
+                                tilt_shift_focus_ratio = gr.Slider(-3, 3, 0, step=0.5, label="Positioning the effect on the y-axis")
+                                tilt_shift_dof = gr.Slider(10, 100, 60, step=1, label="The width of the focus region in pixels")
+                                tilt_shift_btn = gr.Button("refresh", variant="primary")
+
                     with gr.TabItem('Other'):
                         img_other_h_slider = gr.Slider(160, 1280, 320, step=10, label="Image preview height", elem_id='haku_img_h_oth')
                         image_other = gr.Image(type='numpy', label="img", elem_id='haku_img_other', show_label=False)
@@ -226,6 +233,9 @@ def add_tab():
                                 iop_l = gr.Slider(0, 512, 0, step=64, label='fill left')
                                 iop_r = gr.Slider(0, 512, 0, step=64, label='fill right')
                                 iop_btn = gr.Button("refresh", variant="primary")
+                            with gr.TabItem("Custom EXIF"):
+                                custom_exif_area = gr.TextArea(label="Put your custom parameters here")
+                                custom_exif_btn = gr.Button("refresh", variant="primary")
 
             with gr.Column():
                 img_out_h_slider = gr.Slider(160, 1280, 420, step=10, label="Image preview height", elem_id='haku_img_h_out')
@@ -339,6 +349,13 @@ def add_tab():
         neon_btn.click(neon.run, all_neon_input, image_out)
         neon_rst_btn.click(lambda: [16, 1, 'BS'], None, all_neon_set)
 
+        #tilt_shift
+        all_ = [tilt_shift_focus_ratio, tilt_shift_dof]
+        input_ = [image_eff] + all_
+        for component in all_:
+            _release_if_possible(component, tilt_shift.run, input_, image_out)
+        tilt_shift_btn.click(tilt_shift.run, input_, image_out)
+
         #iop
         all_iop_set = [
             iop_u, iop_d, iop_l, iop_r
@@ -347,6 +364,11 @@ def add_tab():
         for component in all_iop_set:
             _release_if_possible(component, outpaint.run, all_iop_input, [image_out, image_mask])
         iop_btn.click(outpaint.run, all_iop_input, [image_out, image_mask])
+
+        #custom exif
+        all_ = [custom_exif_area]
+        input_ = [image_other] + all_
+        custom_exif_btn.click(custom_exif.run, input_, image_out)
 
         #send
         for btns, btn3, img_src in all_btns:
